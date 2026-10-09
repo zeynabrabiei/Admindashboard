@@ -1,15 +1,25 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import styles from './NotFound.module.css';
+import { Link } from "react-router-dom";
+import styles from "./NotFound.module.css";
 
-function NotFound() {
+export default function NotFound() {
   return (
-    <div className={styles.container}>
-      <h1>404</h1>
-      <p>صفحه‌ای با این آدرس پیدا نشد!</p>
-      <Link to="*" className={styles.homeBtn}>برگشت به صفحه اصلی</Link>
-    </div>
+    <main className={styles.container}>
+      <div className={styles.content}>
+        <span className={styles.eyebrow}>PAGE NOT FOUND</span>
+
+        <h1 className={styles.code}>404</h1>
+
+        <h2 className={styles.title}>این صفحه پیدا نشد!</h2>
+
+        <p className={styles.description}>
+          شاید آدرس اشتباه باشد یا صفحه موردنظر جابه‌جا شده باشد.
+        </p>
+
+        <Link to="/" className={styles.homeBtn}>
+          بازگشت به داشبورد
+          <span aria-hidden="true">←</span>
+        </Link>
+      </div>
+    </main>
   );
 }
-
-export default NotFound;

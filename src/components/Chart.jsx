@@ -102,7 +102,37 @@ export default function Chart() {
 
   const safeOrders = Array.isArray(orders) ? orders : [];
 
-  const recentOrders = [...safeOrders].slice(-5).reverse();
+  const fallbackRecentOrders = [
+    {
+      id: "ORD-1048",
+      name: "Olivia Martin",
+      status: "completed",
+    },
+    {
+      id: "ORD-1047",
+      name: "James Wilson",
+      status: "pending",
+    },
+    {
+      id: "ORD-1046",
+      name: "Sophia Brown",
+      status: "completed",
+    },
+    {
+      id: "ORD-1045",
+      name: "Liam Davis",
+      status: "pending",
+    },
+    {
+      id: "ORD-1044",
+      name: "Emma Taylor",
+      status: "completed",
+    },
+  ];
+
+  const recentOrders = safeOrders.length
+    ? [...safeOrders].slice(-5).reverse()
+    : fallbackRecentOrders;
 
   const hasOrderDates = safeOrders.some((order) =>
     getOrderDate(order)

@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useCallback,
@@ -14,6 +15,93 @@ const CUSTOMERS_URL =
 const ORDERS_URL =
   "https://68324c7fc3f2222a8cb1f4ff.mockapi.io/orders";
 
+// Demo data used when the API is unavailable or returns an empty list.
+const DEMO_CUSTOMERS = [
+  {
+    id: "C-1001",
+    name: "Olivia Martin",
+    email: "olivia@example.com",
+    password: "",
+    avatar: "https://i.pravatar.cc/120?img=47",
+    orders: 24,
+    createdAt: "2026-01-12T10:00:00.000Z",
+  },
+  {
+    id: "C-1002",
+    name: "James Wilson",
+    email: "james@example.com",
+    password: "",
+    avatar: "https://i.pravatar.cc/120?img=12",
+    orders: 12,
+    createdAt: "2026-02-04T10:00:00.000Z",
+  },
+  {
+    id: "C-1003",
+    name: "Sophia Brown",
+    email: "sophia@example.com",
+    password: "",
+    avatar: "https://i.pravatar.cc/120?img=44",
+    orders: 31,
+    createdAt: "2026-03-18T10:00:00.000Z",
+  },
+  {
+    id: "C-1004",
+    name: "Liam Davis",
+    email: "liam@example.com",
+    password: "",
+    avatar: "https://i.pravatar.cc/120?img=13",
+    orders: 8,
+    createdAt: "2026-04-09T10:00:00.000Z",
+  },
+  {
+    id: "C-1005",
+    name: "Emma Taylor",
+    email: "emma@example.com",
+    password: "",
+    avatar: "https://i.pravatar.cc/120?img=49",
+    orders: 22,
+    createdAt: "2026-05-21T10:00:00.000Z",
+  },
+];
+
+const DEMO_ORDERS = [
+  {
+    id: "ORD-1048",
+    name: "Olivia Martin",
+    status: true,
+    date: "2026-10-08",
+    createdAt: "2026-10-08T09:30:00.000Z",
+  },
+  {
+    id: "ORD-1047",
+    name: "James Wilson",
+    status: false,
+    date: "2026-10-07",
+    createdAt: "2026-10-07T13:15:00.000Z",
+  },
+  {
+    id: "ORD-1046",
+    name: "Sophia Brown",
+    status: true,
+    date: "2026-10-06",
+    createdAt: "2026-10-06T11:20:00.000Z",
+  },
+  {
+    id: "ORD-1045",
+    name: "Liam Davis",
+    status: false,
+    date: "2026-10-05",
+    createdAt: "2026-10-05T15:45:00.000Z",
+  },
+  {
+    id: "ORD-1044",
+    name: "Emma Taylor",
+    status: true,
+    date: "2026-10-04",
+    createdAt: "2026-10-04T08:10:00.000Z",
+  },
+];
+
 export function useOrders() {
   const context = useContext(OrdersContext);
 
@@ -24,6 +112,25 @@ export function useOrders() {
   return context;
 }
 
+async function fetchList(url, signal) {
+  const response = await fetch(url, {
+    signal,
+    headers: { Accept: "application/json" },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  if (!Array.isArray(data)) {
+    throw new Error("Invalid API response");
+  }
+
+  return data;
+}
+
 export function OrdersProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -31,37 +138,36 @@ export function OrdersProvider({ children }) {
   const [customersLoading, setCustomersLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
 
+  // Keep the real errors available for debugging without showing them
+  // as disruptive messages in the dashboard.
   const [customersError, setCustomersError] = useState("");
   const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchCustomers() {
+    async function loadCustomers() {
       try {
         setCustomersLoading(true);
         setCustomersError("");
 
-        const response = await fetch(CUSTOMERS_URL, {
-          signal: controller.signal,
-        });
+        const data = await fetchList(
+          CUSTOMERS_URL,
+          controller.signal
+        );
 
-        if (!response.ok) {
-          throw new Error("دریافت اطلاعات مشتری‌ها ناموفق بود.");
-        }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error("ساختار اطلاعات مشتری‌ها معتبر نیست.");
-        }
-
-        setCustomers(data);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          setCustomersError(
-            error.message || "خطا در دریافت مشتری‌ها."
+        if (!controller.signal.aborted) {
+          setCustomers(
+            data.length > 0 ? data : DEMO_CUSTOMERS
           );
+        }
+      } catch (error) {
+        if (
+          error.name !== "AbortError" &&
+          !controller.signal.aborted
+        ) {
+          setCustomersError(error.message);
+          setCustomers(DEMO_CUSTOMERS);
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -70,7 +176,7 @@ export function OrdersProvider({ children }) {
       }
     }
 
-    fetchCustomers();
+    loadCustomers();
 
     return () => controller.abort();
   }, []);
@@ -78,31 +184,26 @@ export function OrdersProvider({ children }) {
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchOrders() {
+    async function loadOrders() {
       try {
         setOrdersLoading(true);
         setOrdersError("");
 
-        const response = await fetch(ORDERS_URL, {
-          signal: controller.signal,
-        });
+        const data = await fetchList(
+          ORDERS_URL,
+          controller.signal
+        );
 
-        if (!response.ok) {
-          throw new Error("دریافت اطلاعات سفارش‌ها ناموفق بود.");
+        if (!controller.signal.aborted) {
+          setOrders(data.length > 0 ? data : DEMO_ORDERS);
         }
-
-        const data = await response.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error("ساختار اطلاعات سفارش‌ها معتبر نیست.");
-        }
-
-        setOrders(data);
       } catch (error) {
-        if (error.name !== "AbortError") {
-          setOrdersError(
-            error.message || "خطا در دریافت سفارش‌ها."
-          );
+        if (
+          error.name !== "AbortError" &&
+          !controller.signal.aborted
+        ) {
+          setOrdersError(error.message);
+          setOrders(DEMO_ORDERS);
         }
       } finally {
         if (!controller.signal.aborted) {
@@ -111,7 +212,7 @@ export function OrdersProvider({ children }) {
       }
     }
 
-    fetchOrders();
+    loadOrders();
 
     return () => controller.abort();
   }, []);
@@ -136,7 +237,9 @@ export function OrdersProvider({ children }) {
 
   const deleteOrder = useCallback((id) => {
     setOrders((current) =>
-      current.filter((order) => String(order.id) !== String(id))
+      current.filter(
+        (order) => String(order.id) !== String(id)
+      )
     );
   }, []);
 
@@ -158,8 +261,9 @@ export function OrdersProvider({ children }) {
     ordersError,
     customersError,
 
-    // Backward compatibility for pages using the old error property.
-    error: customersError || ordersError,
+    // Pages using the old generic error property won't display
+    // the API error instead of the fallback content.
+    error: "",
 
     saveCustomer,
     deleteCustomer,

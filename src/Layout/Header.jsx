@@ -1,59 +1,137 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
-import styles from "./Header.module.css";
-import { useAuth } from '../contexts/AuthContext';
+import React from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Bell,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Search,
+} from "lucide-react";
+import Swal from "sweetalert2";
 
-function Header() {
+import { useAuth } from "../contexts/AuthContext";
+import styles from "./Header.module.css";
+
+const pageTitles = {
+  "/": "Dashboard",
+  "/products": "Products",
+  "/orders": "Orders",
+  "/customers": "Customers",
+  "/settings": "Settings",
+};
+
+export default function Header({ onMenuClick }) {
   const { adminName, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const pageTitles = {
-    "/": "Dashboard",
-    "/products": "Products",
-    "/orders": "Orders",
-    "/customers": "Customers",
-    "/settings": "Settings"
-  };
+  const pageTitle = pageTitles[location.pathname] || "Dashboard";
+  const displayName = adminName || "Admin";
 
-  const handleLogout = () => {
-    Swal.fire({
-      title: 'خروج از حساب',
-      text: 'آیا مطمئن هستید که می‌خواهید خارج شوید؟',
-      icon: 'warning',
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: "خروج از حساب",
+      text: "آیا مطمئن هستید که می‌خواهید خارج شوید؟",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'بله، خارج شو',
-      cancelButtonText: 'انصراف'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        logout();
-        navigate('/login');
-      }
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#e5e7eb",
+      confirmButtonText: "بله، خارج شو",
+      cancelButtonText: "انصراف",
+      reverseButtons: true,
+      customClass: {
+        cancelButton: "swal-cancel-button",
+      },
     });
+
+    if (result.isConfirmed) {
+      logout();
+      navigate("/login");
+    }
   };
 
   return (
-    <div className={styles.container}>
-      <h1>{pageTitles[location.pathname] || 'Dashboard'}</h1>
+    <header className={styles.header}>
+      <div className={styles.left}>
+        <button
+          type="button"
+          className={styles.menuButton}
+          onClick={onMenuClick}
+          aria-label="Open navigation"
+        >
+          <Menu size={21} />
+        </button>
+
+        <div className={styles.heading}>
+          <span className={styles.eyebrow}>WORKSPACE / NOVA</span>
+          <h1 className={styles.title}>{pageTitle}</h1>
+        </div>
+      </div>
+
       <div className={styles.actions}>
-        <div className={styles.user}>
-          <div className={styles.profilePicAlt}>
-            {adminName?.charAt(0).toUpperCase()}
-          </div>
-          <h4>{adminName || 'Admin'}</h4>
-        </div>
-        <div className={styles.notifications}>
-          <i className="fas fa-bell"></i>
-        </div>
-        <button className={styles.logout} onClick={handleLogout}>
-          Log Out
+        <label className={styles.search}>
+          <Search size={17} />
+          <input
+            type="search"
+            placeholder="Search anything..."
+            aria-label="Search"
+          />
+          <kbd>⌘ K</kbd>
+        </label>
+
+        <button
+          type="button"
+          className={styles.iconButton}
+          aria-label="Notifications"
+          onClick={() =>
+            Swal.fire({
+              icon: "info",
+              title: "Notifications",
+              text: "You’re all caught up!",
+              confirmButtonColor: "#6366f1",
+            })
+          }
+        >
+          <Bell size={19} />
+          <span className={styles.notificationDot} />
+        </button>
+
+        <div className={styles.divider} />
+
+        <button
+          type="button"
+          className={styles.profile}
+          onClick={() =>
+            Swal.fire({
+              title: displayName,
+              text: "Administrator account",
+              icon: "info",
+              confirmButtonColor: "#6366f1",
+            })
+          }
+        >
+          <span className={styles.avatar}>
+            {displayName.charAt(0).toUpperCase()}
+          </span>
+
+          <span className={styles.profileInfo}>
+            <strong>{displayName}</strong>
+            <small>Administrator</small>
+          </span>
+
+          <ChevronDown size={16} className={styles.chevron} />
+        </button>
+
+        <button
+          type="button"
+          className={styles.logoutButton}
+          onClick={handleLogout}
+          aria-label="Log out"
+          title="Log out"
+        >
+          <LogOut size={18} />
         </button>
       </div>
-    </div>
+    </header>
   );
 }
-
-export default Header;

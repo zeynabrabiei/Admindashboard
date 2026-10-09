@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background: #f5f7fb;
+}
+.menu { flex: 0 0 250px; min-width: 0; }
+.header {
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  background: #f5f7fb;
+  padding: 0 clamp(16px, 2.6vw, 36px) 28px;
+}
+@media (max-width: 760px) {
+  .container { flex-direction: column; }
+  .menu { flex: none; width: 100%; }
+  .header { min-height: auto; padding: 0 16px 24px; }
+}

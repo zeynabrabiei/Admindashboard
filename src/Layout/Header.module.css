@@ -1,0 +1,35 @@
+.container {
+  display: flex;
+  width: 100%;
+  min-height: 94px;
+  gap: 18px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #e8edf5;
+  background: transparent;
+}
+.container h1 { margin: 0; color: #172033; font-size: clamp(22px, 2.2vw, 29px); font-weight: 800; letter-spacing: -.7px; }
+.actions { display: flex; align-items: center; gap: 16px; }
+.user { display: flex; gap: 10px; align-items: center; }
+.profilePic, .profilePicAlt {
+  width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px;
+}
+.profilePicAlt { display: flex; align-items: center; justify-content: center; background: #e5e6ff; color: #5051cf; font-weight: 800; font-size: 17px; }
+.user h4 { margin: 0; color: #29334a; font-size: 14px; font-weight: 700; }
+.notifications {
+  display: grid; place-items: center; width: 42px; height: 42px;
+  border: 1px solid #e6eaf2; border-radius: 13px; background: white; color: #626b80;
+}
+.logout { padding: 11px 15px; background: #fff1f1; color: #d44854; border: 1px solid #ffe0e2; border-radius: 11px; font-size: 13px; font-weight: 700; cursor: pointer; transition: .2s ease; }
+.logout:hover { background: #ffe3e5; }
+@media (max-width: 520px) {
+  .container { min-height: 76px; margin-bottom: 18px; padding: 16px 0; align-items: flex-start; }
+  .actions { gap: 8px; }
+  .user { gap: 7px; }
+  .user h4 { display: none; }
+  .profilePicAlt { width: 36px; height: 36px; flex-basis: 36px; border-radius: 12px; }
+  .notifications { width: 36px; height: 36px; }
+  .logout { padding: 9px 10px; font-size: 12px; }
+}

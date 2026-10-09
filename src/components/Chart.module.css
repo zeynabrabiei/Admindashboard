@@ -1,0 +1,14 @@
+.chartAndOrders { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 22px; margin-top: 24px; min-width: 0; }
+.chartBox, .ordersBox { min-width: 0; overflow: hidden; background: #fff; border: 1px solid #e9edf5; border-radius: 20px; box-shadow: 0 8px 28px rgba(31,43,75,.045); padding: clamp(16px, 2vw, 24px); }
+.boxTitle { margin: 0 0 20px; color: #222c43; font-size: 16px; font-weight: 800; }
+.ordersTable { width: 100%; border-collapse: collapse; }
+.ordersTable th, .ordersTable td { text-align: left; padding: 13px 10px; border-bottom: 1px solid #edf0f6; font-size: 13px; overflow-wrap: anywhere; }
+.ordersTable th { background: #f8f9fd; color: #818ba0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; }
+.ordersTable tr:last-child td { border-bottom: none; }
+.pending, .completed, .canceled { font-weight: 700; white-space: nowrap; }
+.pending { color: #c98517; } .completed { color: #15966b; } .canceled { color: #dc4656; }
+@media (max-width: 1050px) { .chartAndOrders { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 480px) {
+  .chartAndOrders { gap: 14px; margin-top: 16px; }
+  .ordersTable th, .ordersTable td { padding: 11px 6px; font-size: 11px; }
+}

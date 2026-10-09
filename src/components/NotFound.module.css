@@ -1,0 +1,32 @@
+.container {
+  text-align: center;
+  margin-top: 100px;
+  font-family: sans-serif;
+}
+
+h1 {
+  font-size: 100px;
+  color: #ff4d4d;
+  margin-bottom: 0;
+}
+
+p {
+  font-size: 20px;
+  margin-top: 10px;
+  color: #555;
+}
+
+.homeBtn {
+  margin-top: 20px;
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #3085d6;
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.homeBtn:hover {
+  background-color: #2563eb;
+}

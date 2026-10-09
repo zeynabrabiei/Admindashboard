@@ -1,0 +1,139 @@
+.container {
+  padding: 2rem;
+  background-color: #f9fafb;
+}
+
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.controls input,
+.controls select {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  height: 45px;
+  border: 1px solid #ccc;
+}
+.controls select{
+  width: 150px;
+}
+.controls input{
+  width: 300px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.card img {
+  height: 120px;
+  object-fit: contain;
+  margin-bottom: 0.5rem;
+}
+
+.card h4 {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.card p {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 1rem;
+}
+
+.edit {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.delete {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.editModal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  width: 300px;
+}
+
+.editModal input {
+  width: 100%;
+  margin-bottom: 1rem;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.saveBtn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  background-color: #9ca3af;
+  color: white;
+  border: none;
+  padding: 0.4rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.loading {
+  font-size: 1.2rem;
+  text-align: center;
+  color: #4b5563;
+  font-weight: bold;
+  padding: 2rem;
+}

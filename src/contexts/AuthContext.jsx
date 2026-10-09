@@ -1,40 +1,110 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
+
+const DEFAULT_CREDENTIALS = {
+  username: "admin",
+  password: "1234",
+};
+
+function readStorage(key, fallback) {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+}
 
 export function AuthProvider({ children }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [adminName, setAdminName] = useState('');
+  const [userData, setUserData] = useState(() =>
+    readStorage("adminData", DEFAULT_CREDENTIALS)
+  );
 
-  const [userData, setUserData] = useState(() => {
-    const stored = localStorage.getItem("adminData");
-    return stored ? JSON.parse(stored) : { username: "admin", password: "1234" };
-  });
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => localStorage.getItem("adminSession") === "true"
+  );
+
+  const [adminName, setAdminName] = useState(() =>
+    localStorage.getItem("adminName") || ""
+  );
 
   useEffect(() => {
-    localStorage.setItem("adminData", JSON.stringify(userData));
+    try {
+      localStorage.setItem("adminData", JSON.stringify(userData));
+    } catch (error) {
+      console.error("Unable to save admin settings:", error);
+    }
   }, [userData]);
 
-  const login = (username) => {
+  const login = useCallback((username) => {
     setIsLoggedIn(true);
     setAdminName(username);
-  };
 
-  const logout = () => {
+    try {
+      localStorage.setItem("adminSession", "true");
+      localStorage.setItem("adminName", username);
+    } catch (error) {
+      console.error("Unable to save login session:", error);
+    }
+  }, []);
+
+  const logout = useCallback(() => {
     setIsLoggedIn(false);
-    setAdminName('');
-  };
+    setAdminName("");
 
-  const updateCredentials = (newUsername, newPassword) => {
-    setUserData({ username: newUsername, password: newPassword });
-    setAdminName(newUsername);
-  };
+    try {
+      localStorage.removeItem("adminSession");
+      localStorage.removeItem("adminName");
+    } catch (error) {
+      console.error("Unable to clear login session:", error);
+    }
+  }, []);
+
+  const updateCredentials = useCallback((newUsername, newPassword) => {
+    const updatedUser = {
+      username: newUsername.trim(),
+      password: newPassword,
+    };
+
+    setUserData(updatedUser);
+    setAdminName(updatedUser.username);
+
+    try {
+      localStorage.setItem("adminName", updatedUser.username);
+    } catch (error) {
+      console.error("Unable to save admin name:", error);
+    }
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, adminName, login, logout, userData, updateCredentials }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn,
+        adminName,
+        userData,
+        login,
+        logout,
+        updateCredentials,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error("useAuth must be used inside AuthProvider.");
+  }
+
+  return context;
+}

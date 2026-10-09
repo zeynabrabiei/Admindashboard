@@ -115,7 +115,7 @@ src/
 | `npm run lint`    | Run ESLint                   |
 
 ## 🔐 Demo Access
-
+https://paneladminz.vercel.app/
 The project includes demonstration login credentials:
 
 * **Username:** `admin`

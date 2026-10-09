@@ -1,83 +1,174 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
-const OrdersContext = createContext();
-export const useOrders = () => useContext(OrdersContext);
+const OrdersContext = createContext(null);
+
+const CUSTOMERS_URL =
+  "https://68324c7fc3f2222a8cb1f4ff.mockapi.io/customers";
+
+const ORDERS_URL =
+  "https://68324c7fc3f2222a8cb1f4ff.mockapi.io/orders";
+
+export function useOrders() {
+  const context = useContext(OrdersContext);
+
+  if (!context) {
+    throw new Error("useOrders must be used inside OrdersProvider.");
+  }
+
+  return context;
+}
 
 export function OrdersProvider({ children }) {
   const [orders, setOrders] = useState([]);
   const [customers, setCustomers] = useState([]);
+
   const [customersLoading, setCustomersLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  const [customersError, setCustomersError] = useState("");
+  const [ordersError, setOrdersError] = useState("");
 
   useEffect(() => {
-    fetch("https://68324c7fc3f2222a8cb1f4ff.mockapi.io/customers")
-      .then((res) => {
-        if (!res.ok) throw new Error("خطا در دریافت مشتری‌ها");
-        return res.json();
-      })
-      .then((data) => {
+    const controller = new AbortController();
+
+    async function fetchCustomers() {
+      try {
+        setCustomersLoading(true);
+        setCustomersError("");
+
+        const response = await fetch(CUSTOMERS_URL, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت اطلاعات مشتری‌ها ناموفق بود.");
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار اطلاعات مشتری‌ها معتبر نیست.");
+        }
+
         setCustomers(data);
-        setCustomersLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setCustomersLoading(false);
-      });
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setCustomersError(
+            error.message || "خطا در دریافت مشتری‌ها."
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setCustomersLoading(false);
+        }
+      }
+    }
+
+    fetchCustomers();
+
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
-    fetch("https://68324c7fc3f2222a8cb1f4ff.mockapi.io/orders")
-      .then((res) => {
-        if (!res.ok) throw new Error("خطا در دریافت سفارش‌ها");
-        return res.json();
-      })
-      .then((data) => {
+    const controller = new AbortController();
+
+    async function fetchOrders() {
+      try {
+        setOrdersLoading(true);
+        setOrdersError("");
+
+        const response = await fetch(ORDERS_URL, {
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          throw new Error("دریافت اطلاعات سفارش‌ها ناموفق بود.");
+        }
+
+        const data = await response.json();
+
+        if (!Array.isArray(data)) {
+          throw new Error("ساختار اطلاعات سفارش‌ها معتبر نیست.");
+        }
+
         setOrders(data);
-        setOrdersLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setOrdersLoading(false);
-      });
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setOrdersError(
+            error.message || "خطا در دریافت سفارش‌ها."
+          );
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setOrdersLoading(false);
+        }
+      }
+    }
+
+    fetchOrders();
+
+    return () => controller.abort();
   }, []);
 
-  const saveCustomer = (updatedCustomer) => {
-    setCustomers((prev) =>
-      prev.map((c) => (c.id === updatedCustomer.id ? updatedCustomer : c))
-    );
-  };
-
-  const deleteCustomer = (id) => {
-    setCustomers((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const deleteOrder = (id) => {
-    setOrders((prev) => prev.filter((o) => o.id !== id));
-  };
-
-  const updateOrderStatus = (id) => {
-    setOrders((prev) =>
-      prev.map((order) =>
-        order.id === id ? { ...order, status: true } : order
+  const saveCustomer = useCallback((updatedCustomer) => {
+    setCustomers((current) =>
+      current.map((customer) =>
+        String(customer.id) === String(updatedCustomer.id)
+          ? { ...customer, ...updatedCustomer }
+          : customer
       )
     );
+  }, []);
+
+  const deleteCustomer = useCallback((id) => {
+    setCustomers((current) =>
+      current.filter(
+        (customer) => String(customer.id) !== String(id)
+      )
+    );
+  }, []);
+
+  const deleteOrder = useCallback((id) => {
+    setOrders((current) =>
+      current.filter((order) => String(order.id) !== String(id))
+    );
+  }, []);
+
+  const updateOrderStatus = useCallback((id) => {
+    setOrders((current) =>
+      current.map((order) =>
+        String(order.id) === String(id)
+          ? { ...order, status: true }
+          : order
+      )
+    );
+  }, []);
+
+  const value = {
+    orders,
+    customers,
+    ordersLoading,
+    customersLoading,
+    ordersError,
+    customersError,
+
+    // Backward compatibility for pages using the old error property.
+    error: customersError || ordersError,
+
+    saveCustomer,
+    deleteCustomer,
+    deleteOrder,
+    updateOrderStatus,
   };
 
   return (
-    <OrdersContext.Provider
-      value={{
-        orders,
-        ordersLoading,
-        customers,
-        customersLoading,
-        saveCustomer,
-        deleteCustomer,
-        deleteOrder,
-        updateOrderStatus,
-        error,
-      }}
-    >
+    <OrdersContext.Provider value={value}>
       {children}
     </OrdersContext.Provider>
   );

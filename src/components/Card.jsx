@@ -1,17 +1,31 @@
-import React from 'react';
 import styles from "./Card.module.css";
 
-
-function Card({ icon, title, value, type }) {
+export default function Card({
+  icon,
+  title,
+  value,
+  type = "default",
+  description,
+}) {
   return (
-    <div className={`${styles.card} ${styles[type]}`}>
-      <div className={styles.icon}>{icon}</div>
-      <div>
-        <p className={styles.title}>{title}</p>
-        <h3 className={styles.value}>{value}</h3>
-      </div>
-    </div>
-  )
-}
+    <article className={`${styles.card} ${styles[type] || ""}`}>
+      <div className={styles.top}>
+        <div className={styles.icon} aria-hidden="true">
+          {icon}
+        </div>
 
-export default Card;
+        <span className={styles.indicator} />
+      </div>
+
+      <div className={styles.details}>
+        <p className={styles.title}>{title}</p>
+
+        <h3 className={styles.value}>{value}</h3>
+
+        {description && (
+          <p className={styles.description}>{description}</p>
+        )}
+      </div>
+    </article>
+  );
+}
